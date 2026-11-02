@@ -38,7 +38,6 @@ bun cpt ops / explain <op>                       # 能力自描述（JSON Schema
 ```
 
 MCP：`bun run src/mcp/server.ts`（stdio）——全部 Operation 自动映射为 tool，语义与 CLI 一致。
-```
 
 spec 语法：
 - `ds:数据集:字段` —— 普通跟随格（分组语义）
@@ -60,6 +59,15 @@ spec 语法：
 - load → 不操作 → save：与原文 byte-identical
 - 每个操作只改目标 span；保护区守卫 strict 默认开启
 - 写回自动 XML 校验 + 自动备份
+
+## 开发与验证
+
+```
+bun install
+bun test                      # 全量（保真不变量/模型/操作/守卫/CLI/MCP）
+bun test tests/ops.test.ts    # 单个测试文件；bun test -t <名称> 过滤单条
+bun x tsc --noEmit            # 类型检查（改完必跑）
+```
 
 ## 扩展
 
