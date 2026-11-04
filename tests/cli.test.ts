@@ -91,6 +91,7 @@ describe("CLI", () => {
       "param-set-default",
       "row-append",
       "sql-set",
+      "widget-set-default",
     ]);
     for (const o of ops) {
       expect(o.inputSchema.type).toBe("object");

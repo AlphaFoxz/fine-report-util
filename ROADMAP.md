@@ -83,5 +83,6 @@
 - [x] `row-append`：底部追加静态文本行（备注行场景）。只追加不移动现有格；不触碰 RowHeight（新行号超出条目数自动用默认行高）与样式表；CDATA 安全断言
 - [x] `cell-bind`：group spec 支持 `--filter-col` / `--ref-col` 覆盖 CONTRACT_CODE 与 NM/XS 约定（配合已做列名中文化的模板）
 - [x] 守卫精化：无样式引用（s/rs/cs）的纯内容新格开标签不再计为保护区触碰——追加备注行等合法内容无需 allow-protected；带样式/合并属性的开标签增删改仍全量拦截（新增测试锁死）
+- [x] `widget-set-default`：参数面板控件默认值（text/formula/clear）。按 WidgetName 精确匹配 InnerWidget（同前缀 Label 不误伤），只改 `<widgetValue>`；真实台账 ComboCheckBox/DateEditor 序列化验证。真实参数接线场景：9 数据集 `${bookId_c}` 等四控件全量接线 + 账套默认 5300，referencedInSql 0→4，保护区违规 0
 - [x] 真实台账（设计器保存版，用户手工调过格式）验证：85 列改名 + 45 表头更新 + 46 格备注行，保护区违规 0，75 绑定/主格地址/数据行不变；达梦实测 `AS "中文"` 元数据标签精确返回
 

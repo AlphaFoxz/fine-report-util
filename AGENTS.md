@@ -29,6 +29,7 @@ bun cpt cell set <file> --c N --r N --spec SPEC [--left ADDR] [--filter-col C] [
 bun cpt sql set  <file> --ds NAME (--sql S | --file F) [--write]
 bun cpt ds rename <file> --ds NAME --from OLD --to NEW [--write]   # 列改名（AS "中文"），联动绑定/过滤引用/CNAME
 bun cpt row append <file> --file cells.json [--write]              # 底部追加静态文本行（备注行）
+bun cpt widget set-default <file> --widget NAME (--value V | --formula F | --clear) [--write]  # 控件默认值
 bun cpt param list <file> [--ds NAME] [--json]
 bun cpt param set-default <file> --ds NAME --name P --value V [--write]
 bun cpt param remove <file> --ds NAME --name P [--write]

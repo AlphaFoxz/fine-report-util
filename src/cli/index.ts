@@ -16,6 +16,7 @@ import { paramList, paramSetDefault, paramRemove } from "../ops/params.ts";
 import { colInsert, colRemove } from "../ops/columns.ts";
 import { dsRenameColumn } from "../ops/ds-rename-column.ts";
 import { rowAppend } from "../ops/row-append.ts";
+import { widgetSetDefault } from "../ops/widget-set-default.ts";
 import { generateCpt, type GenSpec } from "../generation/generator.ts";
 
 interface GlobalFlags {
@@ -64,6 +65,9 @@ async function main(): Promise<void> {
       width: { type: "string" },
       from: { type: "string" },
       to: { type: "string" },
+      widget: { type: "string" },
+      formula: { type: "string" },
+      clear: { type: "boolean", default: false },
       "filter-col": { type: "string" },
       "ref-col": { type: "string" },
       confirm: { type: "boolean", default: false },
@@ -327,6 +331,24 @@ async function main(): Promise<void> {
     return;
   }
 
+  if (cmd === "widget" && sub === "set-default") {
+    if (!values.widget || (values.value === undefined && values.formula === undefined && values.clear !== true)) {
+      throw Object.assign(
+        new Error("usage: cpt widget set-default <file> --widget NAME (--value V | --formula F | --clear) [--write]"),
+        { code: "USAGE" },
+      );
+    }
+    const result = widgetSetDefault.apply(doc, {
+      widget: values.widget,
+      value: values.value,
+      formula: values.formula,
+      clear: values.clear,
+    });
+    await maybeSave(doc, flags, false);
+    printOut({ ...result, saved: flags.write ? savePayload(doc) : undefined }, flags);
+    return;
+  }
+
   if (cmd === "sql" && sub === "set") {
     if (!values.ds) throw Object.assign(new Error("usage: cpt sql set <file> --ds NAME (--sql S | --file F) [--write]"), { code: "USAGE" });
     const input: SqlSetInput = { dataset: values.ds, sql: values.sql, sqlFile: values.file };
@@ -338,7 +360,7 @@ async function main(): Promise<void> {
 
   throw Object.assign(
     new Error(
-      `unknown command: ${[cmd, sub].filter(Boolean).join(" ")}\ncommands: audit | list | diff | batch | gen | param list|set-default|remove | col insert|remove | cell set | sql set | ds rename | row append | ops | explain`,
+      `unknown command: ${[cmd, sub].filter(Boolean).join(" ")}\ncommands: audit | list | diff | batch | gen | param list|set-default|remove | col insert|remove | cell set | sql set | ds rename | row append | widget set-default | ops | explain`,
     ),
     { code: "USAGE" },
   );

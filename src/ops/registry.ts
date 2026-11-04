@@ -6,6 +6,7 @@ import { paramList, paramSetDefault, paramRemove } from "./params.ts";
 import { colInsert, colRemove } from "./columns.ts";
 import { dsRenameColumn } from "./ds-rename-column.ts";
 import { rowAppend } from "./row-append.ts";
+import { widgetSetDefault } from "./widget-set-default.ts";
 
 const OPS: Record<string, Operation<never>> = {};
 
@@ -22,6 +23,7 @@ register(colInsert);
 register(colRemove);
 register(dsRenameColumn);
 register(rowAppend);
+register(widgetSetDefault);
 
 export function getOp(name: string): Operation<never> | undefined {
   return OPS[name];
