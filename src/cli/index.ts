@@ -14,6 +14,8 @@ import { cellBind, type CellBindInput } from "../ops/cell-bind.ts";
 import { sqlSet, type SqlSetInput } from "../ops/sql-set.ts";
 import { paramList, paramSetDefault, paramRemove } from "../ops/params.ts";
 import { colInsert, colRemove } from "../ops/columns.ts";
+import { dsRenameColumn } from "../ops/ds-rename-column.ts";
+import { rowAppend } from "../ops/row-append.ts";
 import { generateCpt, type GenSpec } from "../generation/generator.ts";
 
 interface GlobalFlags {
@@ -61,6 +63,9 @@ async function main(): Promise<void> {
       header: { type: "string" },
       width: { type: "string" },
       from: { type: "string" },
+      to: { type: "string" },
+      "filter-col": { type: "string" },
+      "ref-col": { type: "string" },
       confirm: { type: "boolean", default: false },
     },
     allowPositionals: true,
@@ -286,10 +291,37 @@ async function main(): Promise<void> {
     const col = Number(values.c);
     const row = Number(values.r);
     if (!Number.isInteger(col) || !Number.isInteger(row) || !values.spec) {
-      throw Object.assign(new Error("usage: cpt cell set <file> --c N --r N --spec SPEC [--left X] [--write]"), { code: "USAGE" });
+      throw Object.assign(new Error("usage: cpt cell set <file> --c N --r N --spec SPEC [--left X] [--filter-col C] [--ref-col C] [--write]"), { code: "USAGE" });
     }
-    const input: CellBindInput = { col, row, spec: values.spec, left: flags.left };
+    const input: CellBindInput = {
+      col,
+      row,
+      spec: values.spec,
+      left: flags.left,
+      filterColumn: values["filter-col"],
+      refColumn: values["ref-col"],
+    };
     const result = cellBind.apply(doc, input);
+    await maybeSave(doc, flags, false);
+    printOut({ ...result, saved: flags.write ? savePayload(doc) : undefined }, flags);
+    return;
+  }
+
+  if (cmd === "ds" && sub === "rename") {
+    if (!values.ds || !values.from || !values.to) {
+      throw Object.assign(new Error("usage: cpt ds rename <file> --ds NAME --from OLD --to NEW [--write]"), { code: "USAGE" });
+    }
+    const result = dsRenameColumn.apply(doc, { dataset: values.ds, from: values.from, to: values.to });
+    await maybeSave(doc, flags, false);
+    printOut({ ...result, saved: flags.write ? savePayload(doc) : undefined }, flags);
+    return;
+  }
+
+  if (cmd === "row" && sub === "append") {
+    if (!values.file) {
+      throw Object.assign(new Error("usage: cpt row append <file> --file cells.json [--write]"), { code: "USAGE" });
+    }
+    const result = await rowAppend.apply(doc, { cellsFile: values.file });
     await maybeSave(doc, flags, false);
     printOut({ ...result, saved: flags.write ? savePayload(doc) : undefined }, flags);
     return;
@@ -306,7 +338,7 @@ async function main(): Promise<void> {
 
   throw Object.assign(
     new Error(
-      `unknown command: ${[cmd, sub].filter(Boolean).join(" ")}\ncommands: audit | list | diff | batch | gen | param list|set-default|remove | col insert|remove | cell set | sql set | ops | explain`,
+      `unknown command: ${[cmd, sub].filter(Boolean).join(" ")}\ncommands: audit | list | diff | batch | gen | param list|set-default|remove | col insert|remove | cell set | sql set | ds rename | row append | ops | explain`,
     ),
     { code: "USAGE" },
   );

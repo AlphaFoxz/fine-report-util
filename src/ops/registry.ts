@@ -4,6 +4,8 @@ import { cellBind } from "./cell-bind.ts";
 import { sqlSet } from "./sql-set.ts";
 import { paramList, paramSetDefault, paramRemove } from "./params.ts";
 import { colInsert, colRemove } from "./columns.ts";
+import { dsRenameColumn } from "./ds-rename-column.ts";
+import { rowAppend } from "./row-append.ts";
 
 const OPS: Record<string, Operation<never>> = {};
 
@@ -18,6 +20,8 @@ register(paramSetDefault);
 register(paramRemove);
 register(colInsert);
 register(colRemove);
+register(dsRenameColumn);
+register(rowAppend);
 
 export function getOp(name: string): Operation<never> | undefined {
   return OPS[name];

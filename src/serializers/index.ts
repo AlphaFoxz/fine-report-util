@@ -139,8 +139,12 @@ export function parseSpec(spec: string): ParsedSpec {
   }
 }
 
-/** spec → <O> 片段；group 的过滤键按约定 NM→NM_CODE、XS→XS_CODE */
-export function specToO(spec: ParsedSpec): string | null {
+/** spec → <O> 片段；group 的过滤键按约定 NM→NM_CODE、XS→XS_CODE。
+ *  列名已中文化（ds-rename-column 改过名）的模板可用 overrides 覆盖约定值。 */
+export function specToO(
+  spec: ParsedSpec,
+  overrides?: { filterColumn?: string; refDs?: string; refColumn?: string },
+): string | null {
   switch (spec.type) {
     case "ds":
       return dsColumn({ ds: spec.ds, column: spec.column, grouper: "function" });
@@ -152,9 +156,10 @@ export function specToO(spec: ParsedSpec): string | null {
         column: spec.column,
         grouper: "mono",
         filter: {
-          ownColumn: "CONTRACT_CODE",
-          refDs: "台账",
-          refColumn: spec.key === "NM" ? "NM_CODE" : "XS_CODE",
+          ownColumn: overrides?.filterColumn ?? "CONTRACT_CODE",
+          refDs: overrides?.refDs ?? "台账",
+          refColumn:
+            overrides?.refColumn ?? (spec.key === "NM" ? "NM_CODE" : "XS_CODE"),
         },
       });
     case "formula":

@@ -12,6 +12,11 @@ export interface CellBindInput {
   spec: string;
   /** group 格手动指定左父格；缺省自动保留原引用或探测主扩展格 */
   left?: string;
+  /** group 格过滤的"自家列"（CNAME）；缺省 CONTRACT_CODE 约定。
+   *  模板做过 ds-rename-column 列名中文化后请传中文名。 */
+  filterColumn?: string;
+  /** group 格被引用数据集的键列（SimpleDSColumn）；缺省按 NM/XS 约定 */
+  refColumn?: string;
 }
 
 export const cellBind = {
@@ -30,6 +35,8 @@ export const cellBind = {
           "ds:数据集:字段 | master:数据集:字段 | group:数据集:字段:NM|XS | formula:表达式 | text:文字 | blank",
       },
       left: { type: "string", description: "可选：手动左父格地址（如 C2）" },
+      filterColumn: { type: "string", description: "可选：group 格过滤自家列（CNAME），缺省 CONTRACT_CODE 约定" },
+      refColumn: { type: "string", description: "可选：group 格被引用数据集键列，缺省 NM/XS 约定" },
     },
     required: ["col", "row", "spec"],
   },
@@ -51,7 +58,10 @@ export const cellBind = {
     const spec = parseSpec(input.spec);
     const oldLeft = extractLeftParent(found.block);
     const oldDir = extractExpandDir(found.block);
-    const o = specToO(spec);
+    const o = specToO(spec, {
+      filterColumn: input.filterColumn,
+      refColumn: input.refColumn,
+    });
     let left: string | undefined;
     if (spec.type === "group") {
       left = input.left ?? oldLeft ?? detectMasterAddress(doc.raw);

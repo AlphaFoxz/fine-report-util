@@ -85,9 +85,11 @@ describe("CLI", () => {
       "cell-bind",
       "col-insert",
       "col-remove",
+      "ds-rename-column",
       "param-list",
       "param-remove",
       "param-set-default",
+      "row-append",
       "sql-set",
     ]);
     for (const o of ops) {

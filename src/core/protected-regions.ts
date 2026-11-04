@@ -8,6 +8,7 @@
  * - <ReportPageAttr>       冻结/重复标题行
  * - <PaperSetting>         页面设置
  * - 每个 <C ...> 开标签     样式引用 s="N" 与合并属性 rs/cs
+ *   （仅携带 s/rs/cs 属性的开标签算资产；无样式的纯内容新格不算触碰）
  */
 
 export const PROTECTED_REGIONS = [
@@ -35,9 +36,13 @@ export function extractProtectedSpans(raw: string): ProtectedSpan[] {
       spans.push({ name, text: m[0] });
     }
   }
-  // 所有单元格开标签（样式引用 + 合并属性都在这里）
+  // 单元格开标签：样式引用 s="N" 与合并属性 rs/cs 在这里——
+  // 只有携带这些属性的开标签才是格式资产；不带样式的纯内容新格（如 agent
+  // 追加的备注行）不属于资产，追加不算触碰（其样式由用户设计器里刷）。
   for (const m of raw.matchAll(/<C c="\d+" r="\d+"[^>]*>/g)) {
-    spans.push({ name: "CellOpenTag", text: m[0] });
+    const tag = m[0];
+    if (!/\b(?:s|rs|cs)="/.test(tag)) continue;
+    spans.push({ name: "CellOpenTag", text: tag });
   }
   return spans;
 }

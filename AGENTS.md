@@ -25,8 +25,10 @@ StyleList、RowHeight、ColumnWidth、ReportPageAttr、PaperSetting、每个 `<C
 bun cpt audit <file> [--json] [--ascii]     # 体检：主格/数据行/数据集/参数三来源/页面属性/告警
 bun cpt list  <file> [--row N] [--json]     # 逐格绑定清单（含条件属性标记）
 bun cpt diff  <a.cpt> <b.cpt>               # 两文件结构化对比
-bun cpt cell set <file> --c N --r N --spec SPEC [--left ADDR] [--write]
+bun cpt cell set <file> --c N --r N --spec SPEC [--left ADDR] [--filter-col C] [--ref-col C] [--write]
 bun cpt sql set  <file> --ds NAME (--sql S | --file F) [--write]
+bun cpt ds rename <file> --ds NAME --from OLD --to NEW [--write]   # 列改名（AS "中文"），联动绑定/过滤引用/CNAME
+bun cpt row append <file> --file cells.json [--write]              # 底部追加静态文本行（备注行）
 bun cpt param list <file> [--ds NAME] [--json]
 bun cpt param set-default <file> --ds NAME --name P --value V [--write]
 bun cpt param remove <file> --ds NAME --name P [--write]
@@ -43,7 +45,8 @@ spec 语法：
 - `ds:数据集:字段` —— 普通跟随格（分组语义）
 - `master:数据集:字段` —— 主扩展格（纵向扩展）
 - `group:数据集:字段:NM|XS` —— 行不等明细组（MonoGrouper + 跨数据集过滤；
-  NM→过滤键 NM_CODE，XS→XS_CODE；左父格自动保留/自动探测主格）
+  NM/XS 对应过滤键约定 NM_CODE/XS_CODE、自家列 CONTRACT_CODE；
+  列名已中文化的模板用 `--filter-col` / `--ref-col` 覆盖）
 - `formula:=表达式` / `text:文字` / `blank`
 
 ## Windows 中文坑（agent 必读）
