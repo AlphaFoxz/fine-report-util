@@ -25,6 +25,34 @@ bun cpt sql set  台账.cpt --ds 台账 --file new.sql --write
 bun cpt ops                               # 能力自描述
 ```
 
+### 远程模板拉取（remote）
+
+把远程服务器（设计器「远程连接」的那个）上的模板批量同步到本地目录，同名覆盖：
+
+```bash
+bun cpt remote envs                                     # 列出设计器里保存的远程连接
+bun cpt remote pull --target D:/backup/reportlets       # 全量拉取（默认 reportlets 根、*.cpt）
+bun cpt remote pull --target D:/dir --prefix reportlets/TRRPZJ0002 --ext cpt,fvs
+bun cpt remote pull --target D:/dir --prefix reportlets/TRRPZJ0002 --strip 1 --prune
+#                        --strip N：剥掉 N 级目录再落地；--prune：镜像同步（删除服务器没有的本地文件，慎用）
+```
+
+原理：调用 `java/FrPull.java` 的预编译产物（`java/precompiled/FrPull.class`，Java 8 字节码），
+复用设计器自带的远程工作空间 RPC 通道（`FineWorkspaceConnector` → `WorkResource.list/readFully`），
+密码用设计器配置里的加密态密文，由 FR 自己的 `SecurityToolbox.defaultDecrypt` 解密，本库不接触明文。
+环境配置从 `%USERPROFILE%/.FineReport*/FineReportEnv.xml` 读取（设计器需勾选记住密码）。
+依赖：**FineReport 安装目录**（`--fr-home`，默认 `FINE_REPORT_HOME` 环境变量或 `D:\FineReport_11.0`，
+运行时直接用其自带的 `jre/`，无需独立 JDK）；只有当 `FrPull.java` 源码更新且预编译 class 过期时
+才需要 javac 重新编译（自动探测 `JAVA_HOME`，`--release 8` 输出到 `java/precompiled/`）。
+
+编程 API：
+
+```ts
+import { pullTemplates } from "./src/index.ts";
+const r = await pullTemplates({ target: "D:/backup/reportlets", prefix: "reportlets", quiet: true });
+r.files; r.bytes; r.errors;
+```
+
 编程 API：
 
 ```ts

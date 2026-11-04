@@ -18,6 +18,7 @@ import { dsRenameColumn } from "../ops/ds-rename-column.ts";
 import { rowAppend } from "../ops/row-append.ts";
 import { widgetSetDefault } from "../ops/widget-set-default.ts";
 import { generateCpt, type GenSpec } from "../generation/generator.ts";
+import { findFineReportEnvFiles, pullTemplates } from "../remote/index.ts";
 
 interface GlobalFlags {
   json: boolean;
@@ -71,6 +72,15 @@ async function main(): Promise<void> {
       "filter-col": { type: "string" },
       "ref-col": { type: "string" },
       confirm: { type: "boolean", default: false },
+      env: { type: "string" },
+      target: { type: "string" },
+      prefix: { type: "string" },
+      ext: { type: "string" },
+      strip: { type: "string" },
+      prune: { type: "boolean", default: false },
+      "fr-home": { type: "string" },
+      "java-home": { type: "string" },
+      quiet: { type: "boolean", default: false },
     },
     allowPositionals: true,
   });
@@ -178,6 +188,35 @@ async function main(): Promise<void> {
       flags,
     );
     return;
+  }
+
+  // ---- cpt remote envs / remote pull ----
+  if (cmd === "remote") {
+    if (sub === "envs") {
+      const files = await findFineReportEnvFiles();
+      printOut(
+        files.map((f) => ({ dir: f.dir, currentEnv: f.currentEnv, envs: f.remoteEnvs.map((e) => ({ name: e.name, url: e.url, username: e.username })) })),
+        flags,
+      );
+      return;
+    }
+    if (sub === "pull") {
+      if (!values.target) throw Object.assign(new Error("usage: cpt remote pull --target <dir> [--env NAME] [--prefix reportlets] [--ext cpt] [--strip N] [--prune] [--fr-home DIR] [--java-home DIR] [--quiet]"), { code: "USAGE" });
+      const r = await pullTemplates({
+        env: values.env,
+        target: values.target,
+        prefix: values.prefix,
+        ext: values.ext ? values.ext.split(",").map((s) => s.trim()).filter(Boolean) : undefined,
+        stripLevels: values.strip !== undefined ? Number(values.strip) : undefined,
+        prune: values.prune ?? false,
+        frHome: values["fr-home"],
+        javaHome: values["java-home"],
+        quiet: values.quiet ?? false,
+      });
+      printOut(r, flags);
+      return;
+    }
+    throw Object.assign(new Error("usage: cpt remote envs | cpt remote pull --target <dir>"), { code: "USAGE" });
   }
 
   if (!file) throw Object.assign(new Error("missing <file> argument"), { code: "USAGE" });

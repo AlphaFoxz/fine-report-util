@@ -25,3 +25,11 @@ export type {
 } from "./core/types.ts";
 export { generateCpt, parseXlsx } from "./generation/index.ts";
 export type { GenSpec, GenColumn, GenDataset, XlsxGrid, ConnectionInfo } from "./generation/index.ts";
+export {
+  parseFineReportEnvXml,
+  findFineReportEnvFiles,
+  resolveRemoteEnv,
+  pullTemplates,
+  resolveFrHome,
+} from "./remote/index.ts";
+export type { RemoteEnvInfo, FineReportEnvFile, PullOptions, PullResult } from "./remote/index.ts";

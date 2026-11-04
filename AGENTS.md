@@ -40,6 +40,22 @@ bun cpt gen --from spec.json [--confirm]         # 全新模板首版（高危�
 bun cpt ops / explain <op>                       # 能力自描述（JSON Schema）
 ```
 
+远程同步（读服务器，不改任何远端数据）：
+
+```
+bun cpt remote envs                              # 设计器里保存的远程连接清单
+bun cpt remote pull --target <dir> [--env NAME] [--prefix reportlets] [--ext cpt]
+                [--strip N] [--prune]
+                                                 # 批量下载远程模板到本地（同名覆盖）
+                                                 # --strip N：落地前剥掉 N 级目录
+                                                 #   （如 --prefix reportlets/TRRPZJ0002 --strip 1
+                                                 #     → <target>/pscs/x.cpt，TRRPZJ0002 这级不落地）
+                                                 # --prune：镜像同步，删除 target 下服务器没有的本地文件
+                                                 #   ⚠ 会删本地多余副本，先确认 target 无手工备份
+                                                 # 原理/依赖见 README「远程模板拉取」
+                                                 # 运行时可用设计器自带 jre（无独立 JDK 也可跑）
+```
+
 MCP：`bun run src/mcp/server.ts`（stdio）——全部 Operation 自动映射为 tool，语义与 CLI 一致。
 
 spec 语法：
